@@ -35,10 +35,11 @@ unique_citibike = pd.DataFrame({'count' : citibike.groupby( [ "start station id"
         
 start_stations = citibike.drop_duplicates('start station id')
 end_stations = citibike.drop_duplicates('end station id')
-#start_stations = start_stations.drop(start_stations.columns[[0,1,2,3,5,8,9,10,11,12,13,14,15]])
-#end_stations = end_stations.drop(end_stations.columns[[0,1,2,3,4,5,6,7,9,12,13,14,15])
+start_stations = start_stations.drop(start_stations.columns[[0,1,2,3,5,8,9,10,11,12,13,14,15]], axis = 1)
+end_stations = end_stations.drop(end_stations.columns[[0,1,2,3,4,5,6,7,9,12,13,14,15]], axis = 1 )
 
-start_stations.
+unique_citibike = start_stations.merge(unique_citibike, on = 'start station id')
+unique_citibike = end_stations.merge(unique_citibike, on = 'end station id')
 
 
 ##upload NYC intersections
