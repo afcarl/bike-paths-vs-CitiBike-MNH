@@ -12,6 +12,7 @@ import pandas as pd
 import numpy as np
 import scipy.stats as stat
 import statsmodels.formula.api as smf
+import json
 
 # Read the data
 
@@ -30,22 +31,63 @@ import statsmodels.formula.api as smf
 # Summarize the street characteristics of the routes, maybe weighted by the frequency
 
 citibike = pd.read_csv('201307_201511citibike.csv')   
+
+"""
+
+Extract data for Manhattan Only
+
+"""
+
+with open('data/stationzips.json') as f:
+    zip_bikes = json.load(f)
+        
+ZIP_Stations = pd.DataFrame(zip_bikes.items(), columns=['start station id', 'start_zip'])
+ZIP_Stations['start station id'] = ZIP_Stations['start station id'].convert_objects(convert_numeric=True)
+
+citibike = pd.merge(citibike,ZIP_Stations,how='inner',on=['start station id'])
+
+ZIP_Stations = pd.DataFrame(zip_bikes.items(), columns=['end station id', 'end_zip'])
+ZIP_Stations['end station id'] = ZIP_Stations['end station id'].convert_objects(convert_numeric=True)
+
+citibike = pd.merge(citibike,ZIP_Stations,how='inner',on=['end station id'])
+
+
+
+"""
+
+Create a unique frame for origins and destinations
+
+"""
+
 unique_citibike = pd.DataFrame({'count' : citibike.groupby( [ "start station id", "end station id"] ).size()}).reset_index()
        
 start_stations = citibike.drop_duplicates('start station id')
 end_stations = citibike.drop_duplicates('end station id')
+
+#Removing all columns except station id, latitude and longitude
 start_stations = start_stations.drop(start_stations.columns[[0,1,2,3,5,8,9,10,11,12,13,14,15]], axis = 1)
 end_stations = end_stations.drop(end_stations.columns[[0,1,2,3,4,5,6,7,9,12,13,14,15]], axis = 1 )
 
 unique_citibike = start_stations.merge(unique_citibike, on = 'start station id')
 unique_citibike = end_stations.merge(unique_citibike, on = 'end station id')
 
+unique_citibike = unique_citibike[(unique_citibike.start_zip>=10002) & (unique_citibike.start_zip <= 10280)
+                                    & (unique_citibike.end_zip>=10002) & (unique_citibike.end_zip <= 10280)]
+
+
+
+"""
+
+Create network of Streets in NYC
+
+"""
+
 ##upload NYC intersections
-NYCintersections = pd.read_csv( 'https://serv.cusp.nyu.edu/files/ADS-2015/NetworkAnalysis/lab2/ManhattanStreetMap_nodes.csv' , index_col=0, header=-1 )
+NYCintersections = pd.read_csv( 'data/ManhattanStreetMap_nodes.csv' , index_col=0, header=-1 )
 NYCintersections.columns=['Y','X','m']
 
 #read the network edges - street connections between adjacent nodes
-NYCstreets = pd.read_csv( 'https://serv.cusp.nyu.edu/files/ADS-2015/NetworkAnalysis/lab2/StreetMap_edges.csv' , index_col=None, header=-1 )
+NYCstreets = pd.read_csv( 'data/StreetMap_edges.csv' , index_col=None, header=-1 )
 NYCstreets.columns=['A','B']
 
 #number of street intersections on Lower Manhattan
@@ -108,29 +150,31 @@ def closest(lon,lat):
     return c 
     
 #find node closest to world trade center, Empire State Building and Metropolitan Museum of Art
-node_wtc=closest(-74.0125,40.7117)
-node_emp=closest(-73.9857,40.7484)
-node_mma=closest(-73.9637,40.7789)
-print('WTC:{0}'.format(node_wtc))
-print('Empire St. Bld.:{0}'.format(node_emp))
-print('Metropolitan Museum:{0}'.format(node_mma))
+#node_wtc=closest(-74.0125,40.7117)
+
+#print('WTC:{0}'.format(node_wtc))
 
 #compute shortest paths, first without distances, just number of edges
-path_wtc_emp=nx.shortest_path(NYCStreetsC,node_wtc,node_emp)
+#path_wtc_emp=nx.shortest_path(NYCStreetsC,node_wtc,node_emp)
 
+"""
 
-path_StartEnd = [[],[],[]]
-for i in unique_citibike.index:
-    path_StartEnd[i,0] = nx.shortest_path(NYCStreetsC,
-                        closest(unique_citibike[i][['start station longitude','start station latitude']]),
-                        closest(unique_citibike[i][['end station longitude','end station latitude']]))
-    path_StartEnd[i,1] = closest(unique_citibike[i][['start station longitude','start station latitude']])
-    path_StartEnd[i,2] = closest(unique_citibike[i][['start station longitude','start station latitude']])
+Create shortest route matrix and network
+
+"""
+
+path_StartEnd = []
+unique_citibike = unique_citibike.sort('count', ascending=False)[0]
+unique_citibike = unique_citibike.reset_index()
+for i in unique_citibike.index.get_values():
+    path_StartEnd.append([nx.shortest_path(NYCStreetsC,
+                        closest(unique_citibike.iloc[i][['start station longitude']], unique_citibike.iloc[i][['start station latitude']]),
+                        closest(unique_citibike.iloc[i][['end station longitude']], unique_citibike.iloc[i][['end station latitude']]))])
+    #path_StartEnd[i,1] = closest(unique_citibike.iloc[i][['start station longitude','start station latitude']])
+    #path_StartEnd[i,2] = closest(unique_citibike.iloc[i][['start station longitude','start station latitude']])
     
 paths         = pd.DataFrame(path_StartEnd)
 paths.columns = ['Route','Start coords', 'End coords']
-
-
 
 
 #
@@ -145,4 +189,4 @@ def visualize_path(path):
     plt.plot(x,y,'ro-')
     plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)
     
-visualize_path(path_wtc_emp)
+visualize_path(path_StartEnd[0])
