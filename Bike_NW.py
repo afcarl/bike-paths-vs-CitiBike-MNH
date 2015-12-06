@@ -31,8 +31,7 @@ import statsmodels.formula.api as smf
 
 citibike = pd.read_csv('201307_201511citibike.csv')   
 unique_citibike = pd.DataFrame({'count' : citibike.groupby( [ "start station id", "end station id"] ).size()}).reset_index()
- 
-        
+       
 start_stations = citibike.drop_duplicates('start station id')
 end_stations = citibike.drop_duplicates('end station id')
 start_stations = start_stations.drop(start_stations.columns[[0,1,2,3,5,8,9,10,11,12,13,14,15]], axis = 1)
@@ -40,7 +39,6 @@ end_stations = end_stations.drop(end_stations.columns[[0,1,2,3,4,5,6,7,9,12,13,1
 
 unique_citibike = start_stations.merge(unique_citibike, on = 'start station id')
 unique_citibike = end_stations.merge(unique_citibike, on = 'end station id')
-
 
 ##upload NYC intersections
 NYCintersections = pd.read_csv( 'https://serv.cusp.nyu.edu/files/ADS-2015/NetworkAnalysis/lab2/ManhattanStreetMap_nodes.csv' , index_col=0, header=-1 )
@@ -72,7 +70,7 @@ for i in NYCstreets.index:
 #as being absent among the ways)
 MLC=sorted(nx.strongly_connected_components(NYCStreets), key=len, reverse=True)
 NYCStreetsC=NYCStreets.subgraph(MLC[0])
-#
+
 ##visualize the street newtork
 #plt.figure(figsize = (15,18))
 #nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=1,width=1,edge_color='green')
@@ -120,9 +118,23 @@ print('Metropolitan Museum:{0}'.format(node_mma))
 #compute shortest paths, first without distances, just number of edges
 path_wtc_emp=nx.shortest_path(NYCStreetsC,node_wtc,node_emp)
 
-path_wtc_mma=nx.shortest_path(NYCStreetsC,node_wtc,node_mma)
 
-len(path_wtc_mma)
+path_StartEnd = [[],[],[]]
+for i in unique_citibike.index:
+    path_StartEnd[i,0] = nx.shortest_path(NYCStreetsC,
+                        closest(unique_citibike[i][['start station longitude','start station latitude']]),
+                        closest(unique_citibike[i][['end station longitude','end station latitude']]))
+    path_StartEnd[i,1] = closest(unique_citibike[i][['start station longitude','start station latitude']])
+    path_StartEnd[i,2] = closest(unique_citibike[i][['start station longitude','start station latitude']])
+    
+paths         = pd.DataFrame(path_StartEnd)
+paths.columns = ['Route','Start coords', 'End coords']
+
+
+
+
+#
+
 
 #auxiliary function - visualize path on the map
 def visualize_path(path):
