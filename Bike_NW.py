@@ -29,8 +29,10 @@ import statsmodels.formula.api as smf
 
 # Summarize the street characteristics of the routes, maybe weighted by the frequency
 
-
-
+citibike = pd.read_csv('201307_201511citibike.csv')   
+unique_citibike = citibike.groupby(['start station id','end station id']).size()
+sorted(citibike['start station id'])
+sorted(unique_citibike)
 ##upload NYC intersections
 NYCintersections = pd.read_csv( 'https://serv.cusp.nyu.edu/files/ADS-2015/NetworkAnalysis/lab2/ManhattanStreetMap_nodes.csv' , index_col=0, header=-1 )
 NYCintersections.columns=['Y','X','m']
