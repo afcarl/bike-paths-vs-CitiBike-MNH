@@ -51,8 +51,6 @@ ZIP_Stations['end station id'] = ZIP_Stations['end station id'].convert_objects(
 
 citibike = pd.merge(citibike,ZIP_Stations,how='inner',on=['end station id'])
 
-
-
 """
 
 Create a unique frame for origins and destinations
@@ -71,10 +69,9 @@ end_stations = end_stations.drop(end_stations.columns[[0,1,2,3,4,5,6,7,9,12,13,1
 unique_citibike = start_stations.merge(unique_citibike, on = 'start station id')
 unique_citibike = end_stations.merge(unique_citibike, on = 'end station id')
 
+# Filter for only Manhattan
 unique_citibike = unique_citibike[(unique_citibike.start_zip>=10002) & (unique_citibike.start_zip <= 10280)
                                     & (unique_citibike.end_zip>=10002) & (unique_citibike.end_zip <= 10280)]
-
-
 
 """
 
@@ -190,3 +187,30 @@ def visualize_path(path):
     plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)
     
 visualize_path(path_StartEnd[0])
+
+"""
+
+Visualize the N shortest paths inside the Manhattan network
+
+"""
+
+
+"""
+
+Interesting plots:
+- Proportion of trips per origin-destination pair
+- Number of intersections per distance, per origin-destination pair
+- (Visualization above)
+- 
+
+"""
+
+"""
+
+Interesting analysis:
+- Representing CB as a network and finding the most important stations in terms of conectivity.
+- Could we cluster, or find groups of stations? What would be the relevance of this?
+- 
+
+
+"""
