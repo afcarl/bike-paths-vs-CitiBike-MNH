@@ -30,7 +30,7 @@ import json
 
 # Summarize the street characteristics of the routes, maybe weighted by the frequency
 
-citibike = pd.read_csv('201307_201511citibike.csv')   
+citibike = pd.read_csv('data/201307_201511citibike.csv')   
 
 """
 
@@ -66,8 +66,8 @@ end_stations = citibike.drop_duplicates('end station id')
 start_stations = start_stations.drop(start_stations.columns[[0,1,2,3,5,8,9,10,11,12,13,14,15]], axis = 1)
 end_stations = end_stations.drop(end_stations.columns[[0,1,2,3,4,5,6,7,9,12,13,14,15]], axis = 1 )
 
-unique_citibike = start_stations.merge(unique_citibike, on = 'start station id')
-unique_citibike = end_stations.merge(unique_citibike, on = 'end station id')
+unique_citibike = pd.merge(unique_citibike, start_stations, on = 'start station id')
+unique_citibike = pd.merge(unique_citibike, end_stations, on = 'end station id')
 
 # Filter for only Manhattan
 unique_citibike = unique_citibike[(unique_citibike.start_zip>=10002) & (unique_citibike.start_zip <= 10280)
