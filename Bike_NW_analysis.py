@@ -104,9 +104,9 @@ path_StartEnd = []
 cbike = cbike.sort('count', ascending=False)[:10]
 cbike = cbike.reset_index()
 for i in cbike.index.get_values():
-    path_StartEnd.append([nx.shortest_path(NYCStreetsC,
+    path_StartEnd.append(nx.shortest_path(NYCStreetsC,
                         closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
-                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]))])
+                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]),'dist'))
     #path_StartEnd[i,1] = closest(unique_citibike.iloc[i][['start station longitude','start station latitude']])
     #path_StartEnd[i,2] = closest(unique_citibike.iloc[i][['start station longitude','start station latitude']])
     
@@ -119,14 +119,14 @@ for i in cbike.index.get_values():
 
 #auxiliary function - visualize path on the map
 def visualize_path(path):
-    plt.figure(figsize = (15,18))
+    plt.figure(figsize = (8,10))
     nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=1,width=1,edge_color='green')
     x=[IntPos[v][0] for v in path]
     y=[IntPos[v][1] for v in path]
     plt.plot(x,y,'ro-')
     plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)
     
-visualize_path(path_StartEnd[3])
+visualize_path(path_StartEnd[5])
 
 """
 
