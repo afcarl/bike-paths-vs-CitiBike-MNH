@@ -26,13 +26,13 @@ import json
 # Summarize the street characteristics of the routes, maybe weighted by the frequency
 
 citibike = pd.read_csv('data/201307_201511citibike.csv')   
+citibike = citibike[citibike.usertype=='Subscriber']
 
 """
 
 Extract data for Manhattan Only
 
 """
-
 unique_citibike = pd.DataFrame({'count' : citibike.groupby( [ "start station id", "end station id"] ).size()}).reset_index()
        
 start_stations = citibike.drop_duplicates('start station id')
