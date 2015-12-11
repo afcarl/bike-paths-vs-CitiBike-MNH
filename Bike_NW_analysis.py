@@ -101,6 +101,7 @@ Create shortest route matrix and network
 """
 
 path_StartEnd = []
+citinetwork = cbike
 cbike = cbike.sort('count', ascending=False)[:10]
 cbike = cbike.reset_index()
 for i in cbike.index.get_values():
@@ -120,17 +121,32 @@ for i in cbike.index.get_values():
 #auxiliary function - visualize path on the map
 def visualize_path(path):
     plt.figure(figsize = (8,10))
-    nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=1,width=1,edge_color='green')
+    nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=0.5,width=1,edge_color='gray')
     x=[IntPos[v][0] for v in path]
     y=[IntPos[v][1] for v in path]
     plt.plot(x,y,'ro-')
-    plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)
+    plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)    
     
-visualize_path(path_StartEnd[5])
-
+visualize_path(path_StartEnd[0])  
+        
 """
 
 Visualize the N shortest paths inside the Manhattan network
+
+Important: automatize plots.
+
+def save_path_plots(path_list):
+    it = 1
+    for path in path_list:
+        fig = plt.figure(figsize = (8,10))
+        fig.add_subplot(nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=0.5,width=1,edge_color='gray'))
+        x=[IntPos[v][0] for v in path]
+        y=[IntPos[v][1] for v in path]
+        plt.plot(x,y,'ro-')
+        plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10) 
+        plt_nm = 'Route' + it + '.png'
+        #plt.savefig(plt_nm)
+        it +=1
 
 """
 
@@ -144,6 +160,28 @@ Interesting plots:
 - 
 
 """
+
+citinetwork['prop_trips'] = 100*citinetwork['count'] / citinetwork['count'].sum()
+
+CB_nw = nx.DiGraph()
+nx.set_edge_attributes(CB_nw,'weight',0)
+for k in citinetwork.index:
+    CB_nw.add_edge(citinetwork['start station id'][k],citinetwork['end station id'][k],weight=citinetwork['prop_trips'][k])
+
+
+
+w_CB = [d['weight'] for (u,v,d) in CB_nw.edges(data=True)]
+
+"""
+   x=[IntPos[v][0] for v in path]
+    y=[IntPos[v][1] for v in path]
+    plt.plot(x,y,'ro-')
+    plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)  
+    """
+    
+# closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']])
+pos_CB = {citinetwork['start station id'][i]: (citinetwork['start station latitude'][i],citinetwork['start station longitude'][i]) for i in citinetwork.index}
+nx.draw(CB_nw,width=w_CB,pos=pos_CB,node_size=30)
 
 """
 
