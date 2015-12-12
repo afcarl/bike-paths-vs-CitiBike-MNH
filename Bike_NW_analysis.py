@@ -213,14 +213,28 @@ for i in cbike.index.get_values():
                         closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]))]
 
 
-data=pd.DataFrame({'start':[],'end':[],'path':[]})
+topo_file=pd.DataFrame({'start':[],'start long':[],'start lat':[],'end':[],'end long':[],'end lat':[],'path':[]})
 for e in cbike.index.get_values():
-    i=data.index.max()
+    i=topo_file.index.max()
     if np.isnan(i):
         i=-1
-    data.loc[i + 1] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['end station id']],nx.shortest_path(NYCStreetsC,
-                        closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
+    topo_file.loc[i + 1] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['start station longitude']],cbike.iloc[i][['start station latitude']],
+             cbike.iloc[i][['end station id']],cbike.iloc[i][['end station longitude']],cbike.iloc[i][['end station latitude']],
+            nx.shortest_path(NYCStreetsC,closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
                         closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]))]
+
+dist_file=pd.DataFrame({'start':[],'start long':[],'start lat':[],'end':[],'end long':[],'end lat':[],'path':[]})
+for e in cbike.index.get_values():
+    i=dist_file.index.max()
+    if np.isnan(i):
+        i=-1
+    dist_file.loc[i + 1] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['start station longitude']],cbike.iloc[i][['start station latitude']],
+             cbike.iloc[i][['end station id']],cbike.iloc[i][['end station longitude']],cbike.iloc[i][['end station latitude']],
+            nx.shortest_path(NYCStreetsC,closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
+                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]),'dist')]
+
+topo_file.to_csv('data/topo_paths.csv')
+dist_file.to_csv('data/dist_paths.csv')
 
 # Number of intersections for the most common trips (or number of intersections per number of trips per edge) - maybe map that out.
 
