@@ -208,10 +208,19 @@ topdict(c5,10)
 
 path_topo = []
 for i in cbike.index.get_values():
-    path_topo.append(nx.shortest_path(NYCStreetsC,
+    path_topo.iloc[i] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['end station id']],nx.shortest_path(NYCStreetsC,
                         closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
-                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']])))
+                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]))]
 
+
+data=pd.DataFrame({'start':[],'end':[],'path':[]})
+for e in cbike.index.get_values():
+    i=data.index.max()
+    if np.isnan(i):
+        i=-1
+    data.loc[i + 1] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['end station id']],nx.shortest_path(NYCStreetsC,
+                        closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
+                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]))]
 
 # Number of intersections for the most common trips (or number of intersections per number of trips per edge) - maybe map that out.
 
