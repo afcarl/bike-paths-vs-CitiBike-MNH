@@ -152,7 +152,7 @@ def save_path_plots(path_list):
 
 
 """
-
+SARA STARTS HERE.
 Interesting plots:
 - Proportion of trips per origin-destination pair
 - Number of intersections per distance, per origin-destination pair
@@ -160,8 +160,18 @@ Interesting plots:
 - 
 
 """
-
 citinetwork['prop_trips'] = 100*citinetwork['count'] / citinetwork['count'].sum()
+plt.plot( (citinetwork.sort('prop_trips', ascending=False))['prop_trips'])
+
+"""
+
+Interesting analysis:
+- Representing CB as a network and finding the most important stations in terms of conectivity.
+- Could we cluster, or find groups of stations? What would be the relevance of this?
+
+"""
+
+
 
 CB_nw = nx.DiGraph()
 nx.set_edge_attributes(CB_nw,'weight',0)
@@ -172,23 +182,9 @@ for k in citinetwork.index:
 
 w_CB = [d['weight'] for (u,v,d) in CB_nw.edges(data=True)]
 
-"""
-   x=[IntPos[v][0] for v in path]
-    y=[IntPos[v][1] for v in path]
-    plt.plot(x,y,'ro-')
-    plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)  
-    """
-    
 # closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']])
 pos_CB = {citinetwork['start station id'][i]: (citinetwork['start station latitude'][i],citinetwork['start station longitude'][i]) for i in citinetwork.index}
 nx.draw(CB_nw,width=w_CB,pos=pos_CB,node_size=30)
 
-"""
+# Calculate the degree of the stations
 
-Interesting analysis:
-- Representing CB as a network and finding the most important stations in terms of conectivity.
-- Could we cluster, or find groups of stations? What would be the relevance of this?
-- 
-
-
-"""
