@@ -18,7 +18,9 @@ import networkx as nx #library supporting networks
 import matplotlib.pyplot as plt #plotting
 import pandas as pd
 
+# Read data
 cbike = pd.read_csv( 'data/unique_citibike201307-201511.csv' , index_col=0)
+station_names = pd.read_csv('data/statnames.csv')
 
 ##upload NYC intersections
 NYCintersections = pd.read_csv( 'data/ManhattanStreetMap_nodes.csv' , index_col=0, header=-1 )
@@ -184,7 +186,35 @@ w_CB = [d['weight'] for (u,v,d) in CB_nw.edges(data=True)]
 
 # closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']])
 pos_CB = {citinetwork['start station id'][i]: (citinetwork['start station latitude'][i],citinetwork['start station longitude'][i]) for i in citinetwork.index}
-nx.draw(CB_nw,width=w_CB,pos=pos_CB,node_size=30)
+#nx.draw(CB_nw,width=w_CB,pos=pos_CB,node_size=30)
+#nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=0.5,width=1,edge_color='gray')
+
+
+# Betweenness, pagerank, eigenvectot
+
+# Finding the most important Citibike Stations from the Networks perspective and visually check if they are surrounded by bike lanes.
+
+#output top tn centrality scores, given the dictionary d
+def topdict(d,tn):
+    ind=sorted(d, key=d.get, reverse=True)
+    for i in range(0,tn):
+       print('{0}|{1}:{2}'.format(i+1,station_names[station_names['start station id']==ind[i]]['start station name'],d[ind[i]]))
+
+c2= nx.eigenvector_centrality(CB_nw)
+topdict(c2,10)
+
+c5 = nx.pagerank(CB_nw,0.85)
+topdict(c5,10)
+
+path_topo = []
+for i in cbike.index.get_values():
+    path_topo.append(nx.shortest_path(NYCStreetsC,
+                        closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
+                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']])))
+
+
+# Number of intersections for the most common trips (or number of intersections per number of trips per edge) - maybe map that out.
+
 
 # Calculate the degree of the stations
 
