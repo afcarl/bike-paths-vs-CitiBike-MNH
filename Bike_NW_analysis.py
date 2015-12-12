@@ -70,6 +70,7 @@ def geodist(lon1,lat1,lon2,lat2):
     c = 2 * atan2(sqrt(a), sqrt(1 - a))
     return R * c
 #
+    
 ##add length attribute to the edges
 nx.set_edge_attributes(NYCStreetsC, 'dist', 0)
 #
@@ -121,15 +122,16 @@ for i in cbike.index.get_values():
 
 
 #auxiliary function - visualize path on the map
-def visualize_path(path):
-    plt.figure(figsize = (8,10))
-    nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=0.5,width=1,edge_color='gray')
-    x=[IntPos[v][0] for v in path]
-    y=[IntPos[v][1] for v in path]
-    plt.plot(x,y,'ro-')
-    plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)    
+def visualize_path(paths):
+    plt.figure(figsize = (16,16))
+    nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=0,width=1,edge_color='#d3d3d3')
+    for path in paths:        
+        x=[IntPos[v][0] for v in path]
+        y=[IntPos[v][1] for v in path]
+        plt.plot(x,y,'r-')
+        plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)    
     
-visualize_path(path_StartEnd[0])  
+visualize_path(path_StartEnd)  
         
 """
 
