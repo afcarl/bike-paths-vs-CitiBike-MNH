@@ -105,7 +105,7 @@ Create shortest route matrix and network
 
 path_StartEnd = []
 citinetwork = cbike
-cbike = cbike.sort('count', ascending=False)[:10]
+cbike = cbike.sort('count', ascending=False)
 cbike = cbike.reset_index()
 for i in cbike.index.get_values():
     path_StartEnd.append(nx.shortest_path(NYCStreetsC,
@@ -119,19 +119,30 @@ for i in cbike.index.get_values():
 
 
 #
+top_path_StartEnd = []
+citinetwork = cbike
+cbike = cbike.sort('count', ascending=False)[:30]
+cbike = cbike.reset_index()
+for i in cbike.index.get_values():
+    top_path_StartEnd.append(nx.shortest_path(NYCStreetsC,
+                        closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
+                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]),'dist'))
 
 
 #auxiliary function - visualize path on the map
-def visualize_path(paths):
+def visualize_path(paths, file_name):
     plt.figure(figsize = (16,16))
     nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=0,width=1,edge_color='#d3d3d3')
     for path in paths:        
         x=[IntPos[v][0] for v in path]
         y=[IntPos[v][1] for v in path]
-        plt.plot(x,y,'r-')
-        plt.plot([x[0],x[-1]],[y[0],y[-1]],'bs',markersize=10)    
-    
-visualize_path(path_StartEnd)  
+        routes = plt.plot(x,y,'-', color='#6600cc')
+        stations = plt.plot([x[0],x[-1]],[y[0],y[-1]],'o', color='#885ead',markersize=6)
+        plt.title('30 Most Common Bike Routes in Manhattan', )
+        plt.legend([routes, stations], ['Citibike stations','Bike routes'])
+        plt.savefig(file_name)
+visualize_path(top_path_StartEnd,'top30.png' )  
+visualize_path(path_StartEnd,'all.png' )  
         
 """
 
@@ -188,8 +199,8 @@ w_CB = [d['weight'] for (u,v,d) in CB_nw.edges(data=True)]
 
 # closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']])
 pos_CB = {citinetwork['start station id'][i]: (citinetwork['start station latitude'][i],citinetwork['start station longitude'][i]) for i in citinetwork.index}
-#nx.draw(CB_nw,width=w_CB,pos=pos_CB,node_size=30)
-#nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=0.5,width=1,edge_color='gray')
+nx.draw(CB_nw,width=w_CB,pos=pos_CB,node_size=30)
+#f=nx.draw(NYCStreetsC,pos=IntPos,with_labels=False,arrows=False,node_size=0.5,width=1,edge_color='gray')
 
 
 # Betweenness, pagerank, eigenvectot
@@ -208,35 +219,35 @@ topdict(c2,10)
 c5 = nx.pagerank(CB_nw,0.85)
 topdict(c5,10)
 
-path_topo = []
-for i in cbike.index.get_values():
-    path_topo.iloc[i] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['end station id']],nx.shortest_path(NYCStreetsC,
-                        closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
-                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]))]
+#path_topo = []
+#for i in cbike.index.get_values():
+#    path_topo.iloc[i] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['end station id']],nx.shortest_path(NYCStreetsC,
+#                        closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
+#                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]))]
+#
 
-
-topo_file=pd.DataFrame({'start':[],'start long':[],'start lat':[],'end':[],'end long':[],'end lat':[],'path':[]})
-for e in cbike.index.get_values():
-    i=topo_file.index.max()
-    if np.isnan(i):
-        i=-1
-    topo_file.loc[i + 1] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['start station longitude']],cbike.iloc[i][['start station latitude']],
-             cbike.iloc[i][['end station id']],cbike.iloc[i][['end station longitude']],cbike.iloc[i][['end station latitude']],
-            nx.shortest_path(NYCStreetsC,closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
-                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]))]
-
-dist_file=pd.DataFrame({'start':[],'start long':[],'start lat':[],'end':[],'end long':[],'end lat':[],'path':[]})
-for e in cbike.index.get_values():
-    i=dist_file.index.max()
-    if np.isnan(i):
-        i=-1
-    dist_file.loc[i + 1] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['start station longitude']],cbike.iloc[i][['start station latitude']],
-             cbike.iloc[i][['end station id']],cbike.iloc[i][['end station longitude']],cbike.iloc[i][['end station latitude']],
-            nx.shortest_path(NYCStreetsC,closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
-                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]),'dist')]
-
-topo_file.to_csv('data/topo_paths.csv')
-dist_file.to_csv('data/dist_paths.csv')
+#topo_file=pd.DataFrame({'start':[],'start long':[],'start lat':[],'end':[],'end long':[],'end lat':[],'path':[]})
+#for e in cbike.index.get_values():
+#    i=topo_file.index.max()
+#    if np.isnan(i):
+#        i=-1
+#    topo_file.loc[i + 1] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['start station longitude']],cbike.iloc[i][['start station latitude']],
+#             cbike.iloc[i][['end station id']],cbike.iloc[i][['end station longitude']],cbike.iloc[i][['end station latitude']],
+#            nx.shortest_path(NYCStreetsC,closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
+#                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]))]
+#
+#dist_file=pd.DataFrame({'start':[],'start long':[],'start lat':[],'end':[],'end long':[],'end lat':[],'path':[]})
+#for e in cbike.index.get_values():
+#    i=dist_file.index.max()
+#    if np.isnan(i):
+#        i=-1
+#    dist_file.loc[i + 1] = [cbike.iloc[i][['start station id']],cbike.iloc[i][['start station longitude']],cbike.iloc[i][['start station latitude']],
+#             cbike.iloc[i][['end station id']],cbike.iloc[i][['end station longitude']],cbike.iloc[i][['end station latitude']],
+#            nx.shortest_path(NYCStreetsC,closest(cbike.iloc[i][['start station longitude']], cbike.iloc[i][['start station latitude']]),
+#                        closest(cbike.iloc[i][['end station longitude']], cbike.iloc[i][['end station latitude']]),'dist')]
+#
+#topo_file.to_csv('data/topo_paths.csv')
+#dist_file.to_csv('data/dist_paths.csv')
 
 # Number of intersections for the most common trips (or number of intersections per number of trips per edge) - maybe map that out.
 
